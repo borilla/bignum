@@ -39,12 +39,11 @@
 
 	test('should be able to add numbers instead of strings', function() {
 		function checkSum(num1, num2, expectedResult) {
-			equal(BigNum.add(num1, num2), expectedResult, 'BigNum.add(\'' + num1 + '\', \'' + num2 + '\') = \'' + expectedResult + '\'');
+			equal(BigNum.add(num1, num2), expectedResult, 'BigNum.add(' + num1 + ', ' + num2 + ') = \'' + expectedResult + '\'');
 		}
 		checkSum(1, 1, '2');
 		checkSum(5, 5, '10');
 		checkSum(12345, 2, '12347');
 		checkSum(0003, 2, '5');
 	});
-
 }());
