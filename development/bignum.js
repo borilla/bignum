@@ -12,6 +12,10 @@ var BigNum = (function() {
 		this.str = BigNum.add(this.str, other);
 	}
 
+	BigNum.prototype.mul = function(other) {
+		this.str = BigNum.mul(this.str, power);
+	}
+
 	function strToDigits(str) {
 		return str.toString().split('').reverse().map(function(x) {
 			return +x;
@@ -19,7 +23,8 @@ var BigNum = (function() {
 	}
 
 	function digitsToStr(digits) {
-		return digits.reverse().join('').replace(/^0+/, '');
+		var str = digits.reverse().join('').replace(/^0+/, '');
+		return str ? str : '0';
 	}
 
 	function addDigits(digits1, digits2) {
@@ -40,10 +45,36 @@ var BigNum = (function() {
 	}
 
 	BigNum.add = function(num1, num2) {
-		var digits1 = num1.digits || strToDigits(num1);
-		var digits2 = num2.digits || strToDigits(num2);
+		var digits1 = strToDigits(num1);
+		var digits2 = strToDigits(num2);
 		var result = addDigits(digits1, digits2);
 		return digitsToStr(result);
+	}
+
+	function buildMem(num) {
+		var mem = {
+			'0': '0',
+			'1': '' + num
+		};
+		var big = new BigNum(num);
+		for (var i = 2; i < 10; ++i) {
+			big.add(num);
+			mem[i] = big.str;
+		}
+		return mem;
+	}
+
+	BigNum.mul = function(num1, num2) {
+		var mem = buildMem(num1);
+		var digits = strToDigits(num2);
+		var total = new BigNum(0);
+		var zeros = '';
+		digits.forEach(function(digit, index) {
+			var num = mem[digit] + zeros;
+			total.add(num);
+			zeros += '0';
+		});
+		return total.str;
 	}
 
 	return BigNum;
