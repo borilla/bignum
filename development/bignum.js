@@ -13,7 +13,7 @@ var BigNum = (function() {
 	}
 
 	BigNum.prototype.mul = function(other) {
-		this.str = BigNum.mul(this.str, power);
+		this.str = BigNum.mul(this.str, other);
 	}
 
 	function strToDigits(str) {
