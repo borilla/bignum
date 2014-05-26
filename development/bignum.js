@@ -16,6 +16,10 @@ var BigNum = (function() {
 		this.str = BigNum.mul(this.str, other);
 	}
 
+	BigNum.prototype.pow = function(power) {
+		this.str = BigNum.pow(this.str, power);
+	}
+
 	function strToDigits(str) {
 		return str.toString().split('').reverse().map(function(x) {
 			return +x;
@@ -75,6 +79,18 @@ var BigNum = (function() {
 			zeros += '0';
 		});
 		return total.str;
+	}
+
+	BigNum.pow = function(num, power) {
+		if (power == 0) {
+			return '1';
+		}
+		// else
+		var big = new BigNum(num);
+		while (--power) {
+			big.mul(num);
+		}
+		return big.str;
 	}
 
 	return BigNum;

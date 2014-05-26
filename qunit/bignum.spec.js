@@ -46,9 +46,10 @@
 		checkSum(12345, 2, '12347');
 		checkSum(0003, 2, '5');
 	});
+
 	test('should be able to multiply two numbers', function() {
 		function checkMultiply(num1, num2, expectedResult) {
-			equal(BigNum.mul(num1, num2), expectedResult, "BigNum.mul('" + num1 + "', '" + num2 + "') = " + expectedResult)
+			equal(BigNum.mul(num1, num2), expectedResult, "BigNum.mul('" + num1 + "', '" + num2 + "') = " + expectedResult);
 		}
 		checkMultiply('123', '0', '0');
 		checkMultiply('123', '1', '123');
@@ -56,5 +57,15 @@
 		checkMultiply('123', '9', '1107');
 		checkMultiply('123', '10', '1230');
 		checkMultiply('123', '123', '15129');
+	});
+
+	test('should be able to raise a number to specified power', function() {
+		function checkPower(num, power, expectedResult) {
+			equal(BigNum.pow(num, power), expectedResult, "BigNum.pow('" + num + "', " + power + ") = " + expectedResult);
+		}
+		checkPower('123', 0, '1');
+		checkPower('123', 1, '123');
+		checkPower('123', 2, '15129');
+		checkPower('2', '8', '256');
 	});
 }());
