@@ -34,6 +34,10 @@ var BigNum = (function() {
 	function addDigits(digits1, digits2) {
 		var result = [];
 		var l = Math.max(digits1.length, digits2.length);
+		var limit = BigNum.limit;
+		if (limit) {
+			l = Math.min(l, limit);
+		}
 		var carry = 0;
 		for (var i = 0; i < l; ++i) {
 			var digit1 = digits1[i] || 0;
