@@ -27,29 +27,32 @@
 		equal(num2.toString(), '1234', 'Can initialise with another BigNum');
 	});
 
-	test('should be able to add two numbers as strings', function() {
-		function checkSum(num1, num2, expectedResult) {
-			equal(BigNum.add(num1, num2), expectedResult, 'BigNum.add(\'' + num1 + '\', \'' + num2 + '\') = \'' + expectedResult + '\'');
+	test('should be able to add two numbers', function() {
+		function checkAdd(num1, num2, expectedResult) {
+			equal(BigNum.add(num1, num2), expectedResult, 'BigNum.add(' + writeVar(num1) + ', ' + writeVar(num2) + ') = ' + writeVar(expectedResult));
 		}
-		checkSum('1', '1', '2');
-		checkSum('5', '5', '10');
-		checkSum('12345', '2', '12347');
-		checkSum('0003', '2', '5');
+		checkAdd('1', '1', '2');
+		checkAdd('5', '5', '10');
+		checkAdd('12345', '2', '12347');
+		checkAdd('0003', '2', '5');
+		checkAdd(1, 1, '2');
+		checkAdd(5, 5, '10');
+		checkAdd(12345, 2, '12347');
+		checkAdd(0003, 2, '5');
 	});
 
-	test('should be able to add numbers instead of strings', function() {
-		function checkSum(num1, num2, expectedResult) {
-			equal(BigNum.add(num1, num2), expectedResult, 'BigNum.add(' + num1 + ', ' + num2 + ') = \'' + expectedResult + '\'');
+	test('should be able to subtract numbers', function() {
+		function checkSubtract(num1, num2, expectedResult) {
+			equal(BigNum.sub(num1, num2), expectedResult, 'BigNum.sub(' + writeVar(num1) + ', ' + writeVar(num2) + ') = ' + writeVar(expectedResult));
 		}
-		checkSum(1, 1, '2');
-		checkSum(5, 5, '10');
-		checkSum(12345, 2, '12347');
-		checkSum(0003, 2, '5');
+		checkSubtract('1', '1', '0');
+		checkSubtract('10', '5', '5');
+		checkSubtract('1000', '999', '1');
 	});
 
 	test('should be able to multiply two numbers', function() {
 		function checkMultiply(num1, num2, expectedResult) {
-			equal(BigNum.mul(num1, num2), expectedResult, "BigNum.mul('" + num1 + "', '" + num2 + "') = " + expectedResult);
+			equal(BigNum.mul(num1, num2), expectedResult, 'BigNum.mul(' + writeVar(num1) + ', ' + writeVar(num2) + ') = ' + writeVar(expectedResult));
 		}
 		checkMultiply('123', '0', '0');
 		checkMultiply('123', '1', '123');
@@ -61,11 +64,19 @@
 
 	test('should be able to raise a number to specified power', function() {
 		function checkPower(num, power, expectedResult) {
-			equal(BigNum.pow(num, power), expectedResult, "BigNum.pow('" + num + "', " + power + ") = " + expectedResult);
+			equal(BigNum.pow(num, power), expectedResult, 'BigNum.pow(' + writeVar(num) + ', ' + writeVar(power) + ') = ' + writeVar(expectedResult));
 		}
 		checkPower('123', 0, '1');
 		checkPower('123', 1, '123');
 		checkPower('123', 2, '15129');
 		checkPower('2', '8', '256');
+		checkPower('123456789012345678901234567890', 1, '123456789012345678901234567890');
 	});
+
+	function writeVar(p) {
+		if (typeof p == 'string') {
+			return "'" + p + "'";
+		}
+		return '' + p;
+	}
 }());

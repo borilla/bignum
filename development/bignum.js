@@ -12,6 +12,10 @@ var BigNum = (function() {
 		this.str = BigNum.add(this.str, other);
 	}
 
+	BigNum.prototype.sub = function(other) {
+		this.str = BigNum.sub(this.str, other);
+	}
+
 	BigNum.prototype.mul = function(other) {
 		this.str = BigNum.mul(this.str, other);
 	}
@@ -52,10 +56,44 @@ var BigNum = (function() {
 		return result;
 	}
 
+	function subtractDigits(digits1, digits2) {
+		var result = [];
+		var carry = 0;
+		var l = Math.max(digits1.length, digits2.length);
+		var limit = BigNum.limit;
+		if (limit) {
+			l = Math.min(l, limit);
+		}
+		for (var i = 0; i < l; ++i) {
+			var digit1 = digits1[i] || 0;
+			var digit2 = digits2[i] || 0;
+			var sum = digit1 - digit2 + carry;
+			if (sum < 0) {
+				carry = -1;
+				sum += 10;
+			}
+			else {
+				carry = 0;
+			}
+			result.push(sum);
+		}
+		if (carry) {
+			result.push(carry);
+		}
+		return result;
+	}
+
 	BigNum.add = function(num1, num2) {
 		var digits1 = strToDigits(num1);
 		var digits2 = strToDigits(num2);
 		var result = addDigits(digits1, digits2);
+		return digitsToStr(result);
+	}
+
+	BigNum.sub = function(num1, num2) {
+		var digits1 = strToDigits(num1);
+		var digits2 = strToDigits(num2);
+		var result = subtractDigits(digits1, digits2);
 		return digitsToStr(result);
 	}
 
