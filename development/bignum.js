@@ -1,7 +1,10 @@
 var BigNum = (function() {
 
 	function BigNum(num) {
-		if (num instanceof BigNum) {
+		if (!num) {
+			zero(this);
+		}
+		else if (num instanceof BigNum) {
 			this.digits = copyArray(num.digits);
 			this.sign = num.sign;
 		}
@@ -25,25 +28,33 @@ var BigNum = (function() {
 
 	BigNum.prototype.add = function(other) {
 		other = ensureBigNum(other);
+		// if signs are the same then simply add the digits
 		if (this.sign == other.sign) {
 			this.digits = addDigits(this.digits, other.digits);
+			// sign remains the same
+			return this;
 		}
-		else if (this.sign == 1) {
-			var result = subtractDigits(this.digits, other.digits);
-			this.digits = result.digits;
-			this.sign = result.invert ? -1 : 1;
+		// else, if numbers are equal but opposite, result is zero
+		var compare = compareDigits(this.digits, other.digits);
+		if (compare == 0) {
+			return zero(this);
 		}
-		else {
-			var result = subtractDigits(other.digits, this.digits);
-			this.digits = result.digits;
-			this.sign = result.invert ? -1 : 1;
+		// else, if this number is greater than the other
+		if (compare == 1) {
+			this.digits = subtractDigits(this.digits, other.digits);
+			// sign remains the same
+			return this;
 		}
+		// else, the other number is greater than this one
+		this.digits = subtractDigits(other.digits, this.digits);
+		// invert the sign
+		this.sign *= -1;
 		return this;
 	}
 
 	BigNum.prototype.sub = function(other) {
 		other = ensureBigNum(other);
-		// temporarily invert sign of other number
+		// temporarily invert sign of other number and add it
 		other.sign *= -1;
 		this.add(other);
 		other.sign *= -1;
@@ -66,6 +77,33 @@ var BigNum = (function() {
 		return this;
 	}
 
+	BigNum.prototype.compare = function(other) {
+		other = ensureBigNum(other);
+		if (this.sign != other.sign) {
+			return this.sign;
+		}
+		// else
+		if (this.sign == 1) {
+			return compareDigits(this.digits, other.digits);
+		}
+		// else
+		return compareDigits(other.digits, this.digits);
+	}
+
+	BigNum.prototype.div = function(other) {
+		var result = BigNum.divMod(this, other);
+		this.digits = result.div.digits;
+		this.sign = result.div.sign;
+		return this;
+	}
+
+	BigNum.prototype.mod = function(other) {
+		var result = BigNum.divMod(this, other);
+		this.digits = result.mod.digits;
+		this.sign = result.mod.sign;
+		return this;
+	}
+
 	BigNum.prototype.pow = function(power) {
 		if (power == 0) {
 			this.digits = [1];
@@ -78,6 +116,11 @@ var BigNum = (function() {
 			}
 		}
 		return this;
+	}
+
+	BigNum.compare = function(num1, num2) {
+		num1 = ensureBigNum(num1);
+		return num1.compare(num2);
 	}
 
 	BigNum.add = function(num1, num2) {
@@ -104,6 +147,56 @@ var BigNum = (function() {
 		return '' + num;
 	}
 
+	BigNum.div = function(num1, num2) {
+		var result = BigNum.divMod(num1, num2);
+		return '' + result.div;
+	}
+
+	BigNum.mod = function(num1, num2) {
+		var result = BigNum.divMod(num1, num2);
+		return '' + result.mod;
+	}
+
+	BigNum.divMod = function(num1, num2) {
+		var total = new BigNum(num1);
+		var divisor = new BigNum(num2);
+		if (isZero(divisor)) {
+			throw 'divide by zero';
+		}
+		var divisorDigits = divisor.digits;
+		var result = new BigNum();
+		var resultDigits = result.digits = [];
+		result.sign = divisor.sign == total.sign ? 1 : -1;
+
+		var zeros = total.digits.length - divisorDigits.length;
+		for (var i = 0; i < zeros; ++i) {
+			divisorDigits.unshift(0);
+		}
+		for (var i = -1; i < zeros; ++i) {
+			var digit = 0;
+			var compare;
+			while ((compare = compareDigits(total.digits, divisorDigits)) != -1) {
+				++digit;
+				if (compare == 0) {
+					zero(total);
+					break;
+				}
+				// else
+				total.digits = subtractDigits(total.digits, divisorDigits);
+			}
+			resultDigits.unshift(digit);
+			if (compare == 0) {
+				break;
+			}
+			divisorDigits.shift();
+		}
+		trimTrailingZeros(resultDigits);
+		return {
+			div: result,
+			mod: total
+		};
+	}
+
 	function ensureBigNum(x) {
 		return x instanceof BigNum ? x : new BigNum(x);
 	}
@@ -115,7 +208,7 @@ var BigNum = (function() {
 	}
 
 	function digitsToStr(digits) {
-		var str = reverseArray(digits).join('').replace(/^0+/, '');
+		var str = reverseArray(digits).join('');
 		return str ? str : '0';
 	}
 
@@ -157,21 +250,6 @@ var BigNum = (function() {
 	}
 
 	function subtractDigits(digits1, digits2) {
-		var compare = compareDigits(digits1, digits2);
-		if (compare == 0) {
-			return {
-				digits: [0],
-				invert: false
-			};
-		}
-		var invert = false;
-		if (compare == -1) {
-			invert = true;
-			var tmp = digits2;
-			digits2 = digits1;
-			digits1 = tmp;
-		}
-
 		var result = [];
 		var carry = 0;
 		var length = Math.max(digits1.length, digits2.length);
@@ -188,10 +266,19 @@ var BigNum = (function() {
 			}
 			result.push(sum);
 		}
-		return {
-			digits: result,
-			invert: invert
-		};
+		trimTrailingZeros(result);
+		return result;
+	}
+
+	function isZero(digits) {
+		digits = digits.digits || digits;
+		return digits.length == 1 && digits[0] == 0;
+	}
+
+	function zero(big) {
+		big.digits = [0];
+		big.sign = 1;
+		return big;
 	}
 
 	function compareDigits(digits1, digits2) {
@@ -203,10 +290,10 @@ var BigNum = (function() {
 		if (length1 > length2) {
 			return 1;
 		}
-		for (var i = 0; i < length1; ++i) {
+		for (var i = length1 - 1; i >= 0; --i) {
 			var digit1 = digits1[i];
 			var digit2 = digits2[i];
-			if (digit1 < digits2) {
+			if (digit1 < digit2) {
 				return -1;
 			}
 			if (digit1 > digit2) {
@@ -214,6 +301,12 @@ var BigNum = (function() {
 			}
 		}
 		return 0;
+	}
+
+	function trimTrailingZeros(digits) {
+		var length = digits.length;
+		while (digits[--length] == 0);
+		digits.length = length + 1;
 	}
 
 	function reverseArray(array) {
