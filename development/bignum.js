@@ -90,6 +90,18 @@ var BigNum = (function() {
 		return compareDigits(other.digits, this.digits);
 	}
 
+	BigNum.prototype.gt = function(other) {
+		return this.compare(other) == 1;
+	}
+
+	BigNum.prototype.lt = function(other) {
+		return this.compare(other) == -1;
+	}
+
+	BigNum.prototype.eq = function(other) {
+		return this.compare(other) == 0;
+	}
+
 	BigNum.prototype.div = function(other) {
 		var result = BigNum.divMod(this, other);
 		this.digits = result.div.digits;
