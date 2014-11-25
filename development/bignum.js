@@ -130,6 +130,10 @@ var BigNum = (function() {
 		return this;
 	}
 
+	BigNum.prototype.isZero = function() {
+		return isZero(this.digits);
+	}
+
 	BigNum.compare = function(num1, num2) {
 		num1 = ensureBigNum(num1);
 		return num1.compare(num2);
